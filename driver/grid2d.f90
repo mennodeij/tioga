@@ -7,12 +7,6 @@ program grid2d
   implicit none
   include "mpif.h"
 
-  ! this test case describes a problem where for two 2d overlapping grids
-  ! the IBLANK and IBLANK_cell values are not determined correctly.
-
-  ! It seems to occur when the cells on the foreground 
-  ! grid are of equal size or larger than on the background grid
-
   integer :: ier, myproc, numprocs
   integer :: i, j, k, o, v, ng
   
@@ -27,7 +21,7 @@ program grid2d
   real*8 :: xyz(3), x, y, z
   integer :: cell(8)
     
-  type(dblArray) :: coord(2)
+  type(dblArray) :: coord(2), nodeResolution(2), cellResolution(2)
   type(intArray) :: connectivity(2), iblank(2), obcnode(2), wbcnode(2), iblank_c(2)
   
   integer :: nvertx(2), nverty(2), nvertz(2)
@@ -65,8 +59,6 @@ program grid2d
     call exit(-1)
   endif
   
-  ! foreground grid has less cells and has half the size
-  ! => cells are exactly the same size on foreground and background grids
   ncellx(1) = 32
   ncelly(1) = 16
   ncellz(1) = 1
@@ -75,17 +67,11 @@ program grid2d
   ncelly(2) = 32
   ncellz(2) = 1
   
-  ! if the foreground grid cells are made slightly smaller, the problem
-  ! does not occur; make them slightly smaller and the problem goes away
-  ! if the cells are exactly the same size, the IBLANK vertex values seem random
-  sizex(1) = 2.0d0 !-1e-8
+  sizex(1) = 2.0d0 
   sizey(1) = 1.0d0
   sizez(1) = 0.1d0
   
-  ! if the background grid cells are made slightly larger, the problem
-  ! does not occur; make them slightly smaller and the problem goes away
-  ! if the cells are exactly the same size, the IBLANK vertex values seem random
-  sizex(2) = 2.0d0 !+1e-8
+  sizex(2) = 2.0d0 
   sizey(2) = 1.0d0
   sizez(2) = 0.1d0
   
@@ -107,13 +93,23 @@ program grid2d
     allocate(iblank(ng)%data(nverts(ng)), stat=ier)
     allocate(connectivity(ng)%data(8*ncells(ng)), stat=ier)
     allocate(iblank_c(ng)%data(ncells(ng)), stat=ier)
+    ! node and cell resolution is used to indicate which nodes/cells solve
+    ! the PDE's, see https://github.com/jsitaraman/tioga/issues/44 for more info
+    allocate(nodeResolution(ng)%data(nverts(ng)), stat=ier)
+    allocate(cellResolution(ng)%data(ncells(ng)), stat=ier)
     
-    if (ng == 1) then ! note: the foreground grid MUST be the first grid
+    if (ng == 1) then 
       nwbc(ng) = 0
       nobc(ng) = nvertz(ng)*(2*(ncellx(ng)+ncelly(ng)))
+      ! grid 1 is the foreground grid: use smaller resolution values
+      nodeResolution(ng)%data = 1.0d0
+      cellResolution(ng)%data = 1.0d0
     else 
       nwbc(ng) = 0
       nobc(ng) = 0
+      ! grid 2 is the background grid: use larger resolution values
+      nodeResolution(ng)%data = 10.0d0
+      cellResolution(ng)%data = 10.0d0
     endif
     
     allocate(wbcnode(ng)%data(nwbc(ng)))
@@ -198,6 +194,7 @@ program grid2d
                                     ncells(ng), &
                                     connectivity(ng)%data)
     call tioga_setcelliblank_multi(ng, iblank_c(ng)%data)
+    call tioga_setresolutions_multi(ng, nodeResolution(ng)%data, cellResolution(ng)%data)
   end do
   
   call tioga_setnfringe(2) ! value of 2 (or 3) does not seem to work; always 1 layerof fringe cells
