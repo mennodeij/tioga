@@ -23,6 +23,10 @@ add_executable(poisson_mms.exe poisson_mms.f90)
 target_link_libraries(poisson_mms.exe tiogadriver)
 set_target_properties(poisson_mms.exe PROPERTIES LINKER_LANGUAGE Fortran)
 
+add_executable(grid2d.exe grid2d.f90)
+target_link_libraries(grid2d.exe tiogadriver)
+set_target_properties(grid2d.exe PROPERTIES LINKER_LANGUAGE Fortran)
+
 install(TARGETS tiogadriver
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
@@ -42,3 +46,9 @@ install(TARGETS poisson_mms.exe
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib)
+  
+install(TARGETS grid2d.exe
+  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib)
+

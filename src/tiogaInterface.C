@@ -269,6 +269,11 @@ extern "C" {
   {
     tg->set_cell_iblank(iblank_cell);
   }
+  
+  void tioga_setcelliblank_multi_(int *btag, int *iblank_cell)
+  {
+    tg->set_cell_iblank(*btag, iblank_cell);
+  }
 
   void tioga_set_highorder_callback_(void (*f1)(int*, int*),
 				    void (*f2)(int *,int *,double *),
