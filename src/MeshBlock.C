@@ -338,7 +338,12 @@ void MeshBlock::tagBoundary(void)
   TIOGA_FREE(iextmp1);
 }
 
-void MeshBlock::writeGridFile(int bid)
+void getFileName(int pid, int numprocs, int meshtag, const char* name, char *result)
+{
+  sprintf(result, "%s-%02d-%05d-%05d.dat", name, meshtag, pid, numprocs);
+}
+
+void MeshBlock::writeGridFile(int pid, int numprocs)
 {
   char fname[80];
   char intstring[7];
@@ -349,8 +354,7 @@ void MeshBlock::writeGridFile(int bid)
   int ba;
   int nvert;
 
-  sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"part%s.dat",&(intstring[1]));
+  getFileName(pid, numprocs, meshtag, "part", fname);
   fp=fopen(fname,"w");
   fprintf(fp,"TITLE =\"Tioga output\"\n");
   fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"IBLANK\"\n");
@@ -421,7 +425,7 @@ void MeshBlock::writeGridFile(int bid)
   return;
 }
 
-void MeshBlock::writeCellFile(int bid)
+void MeshBlock::writeCellFile(int pid, int numprocs)
 {
   char fname[80];
   char qstr[3];
@@ -433,8 +437,7 @@ void MeshBlock::writeCellFile(int bid)
   int ba;
   int nvert;
 
-  sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"cell%s.dat",&(intstring[1]));
+  getFileName(pid, numprocs, meshtag, "cell", fname);
   fp=fopen(fname,"w");
   fprintf(fp, "TITLE =\"Tioga output\"\n");
   fprintf(fp, "VARIABLES = \"X\"\n");
@@ -512,7 +515,7 @@ void MeshBlock::writeCellFile(int bid)
   return;
 }
 
-void MeshBlock::writeFlowFile(int bid,double *q,int nvar,int type)
+void MeshBlock::writeFlowFile(int pid, int numprocs, double *q,int nvar,int type)
 {
   char fname[80];
   char qstr[3];
@@ -537,8 +540,7 @@ void MeshBlock::writeFlowFile(int bid,double *q,int nvar,int type)
       ibl=iblank;
     }
   //
-  sprintf(intstring,"%d",100000+bid);
-  sprintf(fname,"flow%s.dat",&(intstring[1]));
+  getFileName(pid, numprocs, meshtag, "flow", fname);
   fp=fopen(fname,"w");
   fprintf(fp,"TITLE =\"Tioga output\"\n");
   fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"IBLANK\",\"BTAG\" ");

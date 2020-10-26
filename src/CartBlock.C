@@ -540,7 +540,7 @@ void CartBlock::getCancellationData(int *cancelledData, int *ncancel)
 }
 
 
-void CartBlock::writeCellFile(int bid)
+void CartBlock::writeCellFile(int pid, int numprocs)
 {
   int ibmin,ibmax;
   char fname[80];
@@ -559,9 +559,9 @@ void CartBlock::writeCellFile(int bid)
   ibmax=-30000000;
   nnodes=(dims[1]+1)*(dims[0]+1)*(dims[2]+1);
   ncells=dims[0]*dims[1]*dims[2];
-  sprintf(intstring,"%d",100000+myid);
-  sprintf(fname,"cart_cell%s.dat",&(intstring[1]));
-  if (bid==0) 
+  sprintf(fname, "cart_cells-%02d-%05d-%05d.dat", global_id, pid, numprocs);
+
+  if (pid==0)
     {
       fp=fopen(fname,"w");
     }
@@ -569,7 +569,7 @@ void CartBlock::writeCellFile(int bid)
     {
       fp=fopen(fname,"a");
     }
-  if (bid==0) {
+  if (pid==0) {
   fprintf(fp,"TITLE =\"Tioga output\"\n");
   fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"IBLANK_CELL\" ");
   fprintf(fp,"\n");

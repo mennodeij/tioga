@@ -101,11 +101,7 @@ void tioga::profile(void)
     mb->mexclude=mexclude;
     mb->nfringe=nfringe;
     mb->preprocess();
-    //mb->writeGridFile(myid);
    }
-  //mb->writeOBB(myid);
-  //if (myid==4) mb->writeOutput(myid);
-  //if (myid==4) mb->writeOBB(myid);
   this->myTimer("tioga::profile",1);
 }
 
@@ -146,17 +142,12 @@ void tioga::performConnectivity(void)
     else {
       mb->getCellIblanks();
     }
-    //mb->writeGridFile(100*myid+mtags[ib]);
   }
   this->myTimer("tioga::getCellIblanks",1);
   if (qblock) TIOGA_FREE(qblock);
   qblock=(double **)malloc(sizeof(double *)*nblocks);
   for(int ib=0;ib<nblocks;ib++)
     qblock[ib]=NULL;
-  //}
-  //mb->writeOutput(myid);
-  //TRACEI(myid);
-  //this->myTimer("tioga::performConnectivity",1);
 }
 
 void tioga::performConnectivityHighOrder(void)
@@ -206,9 +197,6 @@ void tioga::performConnectivityAMR(void)
     auto &mb = mblocks[ib];
     mb->getCellIblanks();
    }
-  //  mb->writeCellFile(myid);
-  //for(i=0;i<ncart;i++)
-	//cb[i].writeCellFile(i);
   MPI_Barrier(scomm);
   //printf("Finished performConnectivityAMR in %d\n",myid);
   //ierr=0;
@@ -525,10 +513,9 @@ void tioga::dataUpdate(int nvar,int interptype, int at_points)
 
 void tioga::writeData(int nvar,int interptype)
 {
-  //mb->writeGridFile(myid);
   for(int ib=0;ib<nblocks;ib++) {
-     mblocks[ib]->writeFlowFile(100*myid+ib,qblock[ib],nvar,interptype);
-     mblocks[ib]->writeCellFile(100*myid+ib);
+     mblocks[ib]->writeFlowFile(myid, numprocs,qblock[ib],nvar,interptype);
+     mblocks[ib]->writeCellFile(myid, numprocs);
   }
 }
 

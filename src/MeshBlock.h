@@ -185,9 +185,9 @@ class MeshBlock
 
   void tagBoundary(void);
   
-  void writeGridFile(int bid);
+  void writeGridFile(int pid, int numprocs);
 
-  void writeFlowFile(int bid,double *q,int nvar,int type);
+  void writeFlowFile(int pid, int numprocs,double *q,int nvar,int type);
   
   void setData(int btag,int nnodesi,double *xyzi, int *ibli,int nwbci, int nobci, 
 	       int *wbcnodei,int *obcnodei,
@@ -295,7 +295,7 @@ class MeshBlock
     check_intersect_p4est=f2;
   }
 
-  void writeCellFile(int);
+  void writeCellFile(int pid, int numprocs);
   void getInternalNodes(void);
   void getExtraQueryPoints(OBB *obb,int *nints,int **intData,int *nreals,
 		      double **realData);
