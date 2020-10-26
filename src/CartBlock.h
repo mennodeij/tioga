@@ -67,7 +67,7 @@ class CartBlock
   void processDonors(HOLEMAP *holemap, int nmesh);
   void insertInDonorList(int senderid,int index,int meshtagdonor,int remoteid,int remoteblockid,double cellRes);
   void insertInInterpList(int procid,int remoteid,int remoteblockid,double *xtmp);
-  void writeCellFile(int bid);
+  void writeCellFile(int pid, int numprocs);
   void clearLists(void);
   void initializeLists(void);
 };
