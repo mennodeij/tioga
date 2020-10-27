@@ -21,6 +21,7 @@
 #include "MeshBlock.h"
 #include <cstring>
 #include <stdexcept>
+#include <unistd.h>
 
 extern "C" {
   void findOBB(double *x,double xc[3],double dxc[3],double vec[3][3],int nnodes);
@@ -340,7 +341,7 @@ void MeshBlock::tagBoundary(void)
 
 void getFileName(int pid, int numprocs, int meshtag, const char* name, char *result)
 {
-  sprintf(result, "%s-%02d-%05d-%05d.dat", name, meshtag, pid, numprocs);
+  sprintf(result, "%s-%02d-%05d.dat", name, meshtag, numprocs);
 }
 
 void MeshBlock::writeGridFile(int pid, int numprocs)
@@ -438,14 +439,20 @@ void MeshBlock::writeCellFile(int pid, int numprocs)
   int nvert;
 
   getFileName(pid, numprocs, meshtag, "cell", fname);
-  fp=fopen(fname,"w");
-  fprintf(fp, "TITLE =\"Tioga output\"\n");
-  fprintf(fp, "VARIABLES = \"X\"\n");
-  fprintf(fp, "\"Y\"\n");
-  fprintf(fp, "\"Z\"\n");
-  fprintf(fp, "\"IBLANK\"\n");
-  fprintf(fp, "\"IBLANK_CELL\"\n");
-  fprintf(fp, "ZONE T=\"VOL_MIXED\"\n");
+  if (pid == 0) {
+    fp=fopen(fname,"w");
+  
+    fprintf(fp, "TITLE =\"Tioga output\"\n");
+    fprintf(fp, "VARIABLES = \"X\"\n");
+    fprintf(fp, "\"Y\"\n");
+    fprintf(fp, "\"Z\"\n");
+    fprintf(fp, "\"IBLANK\"\n");
+    fprintf(fp, "\"IBLANK_CELL\"\n");
+  }
+  else {
+    fp=fopen(fname,"a");
+  }
+  fprintf(fp, "ZONE T=\"VOL_MIXED_%d\"\n",myid);
   fprintf(fp, " Nodes=%d, Elements=%d, ZONETYPE=FEBrick\n", nnodes, ncells);
   fprintf(fp, " DATAPACKING=BLOCK\n");
   fprintf(fp, " VARLOCATION=([5]=CELLCENTERED)\n");
@@ -511,6 +518,7 @@ void MeshBlock::writeCellFile(int pid, int numprocs)
 	    }
 	}
     }
+  fflush(fp);
   fclose(fp);
   return;
 }
@@ -541,6 +549,7 @@ void MeshBlock::writeFlowFile(int pid, int numprocs, double *q,int nvar,int type
     }
   //
   getFileName(pid, numprocs, meshtag, "flow", fname);
+  if (pid == 0) {
   fp=fopen(fname,"w");
   fprintf(fp,"TITLE =\"Tioga output\"\n");
   fprintf(fp,"VARIABLES=\"X\",\"Y\",\"Z\",\"IBLANK\",\"BTAG\" ");
@@ -549,9 +558,12 @@ void MeshBlock::writeFlowFile(int pid, int numprocs, double *q,int nvar,int type
       sprintf(qstr,"Q%d",i);
       fprintf(fp,"\"%s\",",qstr);
     }
-  fprintf(fp,"\n");
-  fprintf(fp,"ZONE T=\"VOL_MIXED\",N=%d E=%d ET=BRICK, F=FEPOINT\n",nnodes,
-	  ncells);
+  }
+  else {
+    fp=fopen(fname, "a");
+  }
+  
+  fprintf(fp,"ZONE T=\"VOL_MIXED_%d\",N=%d E=%d ET=BRICK, F=FEPOINT\n",pid,nnodes,ncells);
 
   if (type==0)
     {

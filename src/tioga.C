@@ -513,9 +513,16 @@ void tioga::dataUpdate(int nvar,int interptype, int at_points)
 
 void tioga::writeData(int nvar,int interptype)
 {
-  for(int ib=0;ib<nblocks;ib++) {
-     mblocks[ib]->writeFlowFile(myid, numprocs,qblock[ib],nvar,interptype);
-     mblocks[ib]->writeCellFile(myid, numprocs);
+  // enforce ordered-by-process writing
+  for(int iproc=0; iproc<numprocs; ++iproc) {
+    if (iproc == myid){
+
+      for(int ib=0;ib<nblocks;ib++) {
+         mblocks[ib]->writeFlowFile(myid, numprocs,qblock[ib],nvar,interptype);
+         mblocks[ib]->writeCellFile(myid, numprocs);
+      }
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
   }
 }
 

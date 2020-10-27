@@ -27,6 +27,11 @@ add_executable(grid2d.exe grid2d.f90)
 target_link_libraries(grid2d.exe tiogadriver)
 set_target_properties(grid2d.exe PROPERTIES LINKER_LANGUAGE Fortran)
 
+add_executable(grid2d_dist.exe grid2d_dist.f90)
+target_link_libraries(grid2d_dist.exe tiogadriver)
+set_target_properties(grid2d_dist.exe PROPERTIES LINKER_LANGUAGE Fortran)
+
+
 install(TARGETS tiogadriver
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
@@ -52,3 +57,7 @@ install(TARGETS grid2d.exe
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib)
 
+install(TARGETS grid2d_dist.exe
+  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib)
